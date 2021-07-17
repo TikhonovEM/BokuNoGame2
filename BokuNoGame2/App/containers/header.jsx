@@ -8,7 +8,7 @@ export default class Header extends React.Component {
             <header>
                 <nav className="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-dark border-bottom box-shadow mb-3">
                     <div className="container-fluid">
-                        <NavLink to='/' activeClassName="navbar-brand text-light" activeStyle={{ width: "160px" }}>No Game No Life</NavLink>
+                        <NavLink to='/' className="navbar-brand text-light" style={{ width: "160px" }}>No Game No Life</NavLink>
                         <button className="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                             aria-expanded="false" aria-label="Toggle navigation">
                             <span className="navbar-toggler-icon"></span>
@@ -35,7 +35,7 @@ export default class Header extends React.Component {
                                     </form>
                                 </li>
                                 <li className="nav-item">
-                                    <NavLink to='/GameList' activeStyle={{ marginLeft: "15px" }}>
+                                    <NavLink to='/GameList' style={{ marginLeft: "15px" }}>
                                         <button className="btn btn-dark" type="submit">
                                             <i className="fa fa-search"></i> Расширенный поиск
                                         </button>
