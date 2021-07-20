@@ -12,7 +12,7 @@ export default class Game extends React.Component {
         };
     }
 
-    componentWillMount() {
+    componentDidMount() {
 
         const opts = {
             method: 'GET',

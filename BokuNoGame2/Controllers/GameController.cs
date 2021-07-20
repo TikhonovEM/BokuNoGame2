@@ -43,5 +43,25 @@ namespace BokuNoGame2.Controllers
 
             return new { game, catalog };
         }
+
+        [HttpGet("GameList")]
+        public object GameList(int page = 1)
+        {
+            var pageSize = 30;
+
+            var games = _context.Games.AsNoTracking();
+            var count = games.Count();
+            var pagination = new Page(count, page, 30);
+            var gameList = games.Skip((page - 1) * pageSize)
+                .Take(pageSize).ToList()
+                .Select(g => new
+                {
+                    g.Id,
+                    g.Name,
+                    g.Logo
+                });
+
+            return new { games = gameList, pagination };
+        }
     }
 }
