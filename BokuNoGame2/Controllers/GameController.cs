@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BokuNoGame2.Extensions;
+using System.ComponentModel.DataAnnotations;
 
 namespace BokuNoGame2.Controllers
 {
@@ -29,10 +31,29 @@ namespace BokuNoGame2.Controllers
 
 
             var game = _context.Games.Find(gameId);
+            var displayGame = new
+            {
+                game.Id,
+                game.Name,
+                game.Description,
+                game.Developer,
+                game.Publisher,
+                Genre = game.Genre.GetAttribute<DisplayAttribute>().GetName(),
+                game.AgeRating,
+                game.Logo,
+                ReleaseDate = game.ReleaseDate.ToShortDateString()
+            };
             var user = await _userManager.GetUserAsync(User);
 
             Catalog catalog = user != null ? _context.GameSummaries.Include(gs => gs.Catalog).Include(gs => gs.Game)
                 .FirstOrDefault(gs => gs.UserId.Equals(user.Id) && gs.GameId == gameId)?.Catalog : null;
+
+            var currentRate = _context.GetGameAverageRating(gameId);
+            var rate = new
+            {
+                currentRate,
+                currentRateStr = (currentRate / 2).ToString(System.Globalization.CultureInfo.InvariantCulture)
+            };
 
             /*if (catalog != null)
                 ViewBag.Catalogs = new SelectList(_context.Catalogs, "Id", "Name", catalog.Id);
@@ -41,7 +62,7 @@ namespace BokuNoGame2.Controllers
 
             return View(new GameViewModel() { Game = game, Catalog = catalog });*/
 
-            return new { game, catalog };
+            return new { game = displayGame, catalog, rate };
         }
 
         [HttpGet("GameList")]
