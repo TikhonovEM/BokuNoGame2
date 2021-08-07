@@ -5,6 +5,8 @@ import Header from './header.jsx';
 import GameList from './gamelist.jsx';
 import MainPage from './main.jsx';
 import Game from './game.jsx';
+import Login from './login.jsx'
+import Register from './register.jsx'
 
 export default class App extends React.Component {
     render() {
@@ -14,6 +16,8 @@ export default class App extends React.Component {
                 <div className="container-fluid">
                     <main role="main" className="pb-3">
                         <Route path='/' exact component={MainPage} />
+                        <Route path='/Account/Register' component={Register} />
+                        <Route path='/Account/Login' component={Login} />
                         <Route path='/GameList' component={GameList} />
                         <Route path='/Game/:gameId' component={Game} />
                     </main>

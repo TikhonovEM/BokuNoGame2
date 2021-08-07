@@ -53,12 +53,12 @@ namespace BokuNoGame2
             services.AddDbContext<UserContext>(options =>
                 options.UseSqlServer(accountConnection));
 
-            /*services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
             {
                 options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
                 options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
-            });*/
+            });
 
             services.AddAuthorization();
         }
@@ -69,6 +69,9 @@ namespace BokuNoGame2
                 app.UseDeveloperExceptionPage();
                 app.UseWebpackDevMiddleware();
             }
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseStaticFiles();
             app.UseMvc(routes =>

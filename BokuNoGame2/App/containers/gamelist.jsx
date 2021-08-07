@@ -73,6 +73,27 @@ export default class GameList extends React.Component {
                         </button>
                     }
                 </div>
+                <div className="col-md-4 order-md-2">
+                    <div className="sticky-top">
+                        <div className="card">
+                            <div className="card-header">
+                                Панель фильтрации
+                            </div>
+                            <div className="card-body">
+                            </div>
+                            <div className="w-100 d-none d-md-block"></div>
+                            <div className="card-footer">
+                                <div className="row">
+                                    <div className="col-md-3">
+                                        <button type="submit" className="btn btn-success">
+                                            Применить
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }

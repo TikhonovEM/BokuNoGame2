@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Switch, NavLink } from 'react-router-do
 
 export default class Header extends React.Component {
     render() {
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
         return (
             <header>
                 <nav className="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-dark border-bottom box-shadow mb-3">
@@ -14,14 +15,31 @@ export default class Header extends React.Component {
                             <span className="navbar-toggler-icon"></span>
                         </button>
                         <div className="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                            <ul className="navbar-nav">
-                                <li className="nav-item">
-                                    <a className="nav-link text-info" asp-area="" asp-controller="Account" asp-action="Register">Регистрация</a>
-                                </li>
-                                <li className="nav-item">
-                                    <a className="nav-link text-info" asp-area="" asp-controller="Account" asp-action="Login">Войти</a>
-                                </li>
-                            </ul>
+                            {
+                                (userInfo != null && userInfo.isSignedIn)
+                                    ? <ul className="navbar-nav">
+                                        {
+                                            userInfo.roles.includes("Admin") &&
+                                            <li className="nav-item">
+                                                <NavLink to="/" className="nav-link text-info">Администрирование</NavLink>
+                                            </li>
+                                        }
+                                        <li className="nav-item">
+                                            <a className="nav-link text-info">Профиль</a>
+                                        </li>
+                                        <li className="nav-item">
+                                            <button type="button" className="nav-link btn btn-link text-info" onClick={e => logout()}>Выйти</button>
+                                        </li>
+                                    </ul>
+                                    : <ul className="navbar-nav">
+                                        <li className="nav-item">
+                                            <NavLink to='/Account/Register' className="nav-link text-info">Регистрация</NavLink>
+                                        </li>
+                                        <li className="nav-item">
+                                            <NavLink to='/Account/Login' className="nav-link text-info">Войти</NavLink>
+                                        </li>
+                                    </ul>
+                            }
                             <ul className="navbar-nav flex-grow-1">
                                 <li className="nav-item">
                                     <form className="form-inline" asp-controller="Game" asp-action="GameByName" method="post">
