@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BokuNoGame2.IntegrationServices;
 
 namespace BokuNoGame2
 {
@@ -76,6 +77,12 @@ namespace BokuNoGame2
             });
 
             services.AddAuthorization();
+
+            #region Интеграция
+            services.AddTransient<IntegrationJobFactory>();
+            services.AddScoped<SteamIntegrationJob>();
+            services.AddScoped<IBaseIntegrationService, SteamIntegratonService>();
+            #endregion
         }
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
