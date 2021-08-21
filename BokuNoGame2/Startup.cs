@@ -46,12 +46,27 @@ namespace BokuNoGame2
                 .AddEntityFrameworkStores<UserContext>();
 
             var defaultConnection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<AppDBContext>(options =>
-                options.UseSqlServer(defaultConnection));
-
             var accountConnection = Configuration.GetConnectionString("AccountConnection");
-            services.AddDbContext<UserContext>(options =>
-                options.UseSqlServer(accountConnection));
+
+            var dbEngine = Configuration["DatabaseEngine"];
+            if (Equals(dbEngine.ToLower().Trim(), "mssql"))
+            {
+                services.AddDbContext<AppDBContext>(options =>
+                    options.UseSqlServer(defaultConnection));
+
+
+                services.AddDbContext<UserContext>(options =>
+                    options.UseSqlServer(accountConnection));
+            }
+            else
+            {
+                services.AddDbContext<AppDBContext>(options =>
+                    options.UseNpgsql(defaultConnection));
+
+
+                services.AddDbContext<UserContext>(options =>
+                    options.UseNpgsql(accountConnection));
+            }
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>

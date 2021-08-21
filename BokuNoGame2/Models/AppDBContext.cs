@@ -11,8 +11,9 @@ namespace BokuNoGame2.Models
     {
         public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
         {
-
+            Database.EnsureCreated();
         }
+
 
         public DbSet<Game> Games { get; set; }
         public DbSet<Catalog> Catalogs { get; set; }
