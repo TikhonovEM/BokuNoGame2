@@ -1,8 +1,12 @@
+using BokuNoGame2.Models;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog.Web;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,23 +17,57 @@ namespace BokuNoGame2
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            var host = BuildWebHost(args);
+            var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            try
+            {
+                var webHost = BuildWebHost(args);
 
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
-            var config = builder.Build();
+                using (var scope = webHost.Services.CreateScope())
+                {
+                    var services = scope.ServiceProvider;
 
-            host.Run();
+                    try
+                    {
+                        var userManager = services.GetRequiredService<UserManager<User>>();
+                        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                        var context = services.GetService<AppDBContext>();
+                        await Services.IdentityInitializer.InitializeAsync(userManager, roleManager, context);
+                        IntegrationServices.SteamIntegratonScheduler.Start(services);
+                    }
+                    catch
+                    {
+
+                    }
+
+                }
+
+                webHost.Run();
+            }
+            catch (Exception e)
+            {
+                //NLog: catch setup errors
+                logger.Error(e, "Stopped program because of exception");
+                throw;
+            }
+            finally
+            {
+                NLog.LogManager.Shutdown();
+            }
         }
 
         public static IWebHost BuildWebHost(string[] args)
         {
             return WebHost.CreateDefaultBuilder(args)
              .UseStartup<Startup>()
-             .Build();
+             .ConfigureLogging(logging =>
+             {
+                 logging.ClearProviders();
+                 logging.SetMinimumLevel(LogLevel.Trace);
+             })
+            .UseNLog()
+            .Build();
         }
     }
 }
