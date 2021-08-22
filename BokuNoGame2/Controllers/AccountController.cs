@@ -62,7 +62,21 @@ namespace BokuNoGame2.Controllers
             return new
             {
                 IsSignedIn = _signInManager.IsSignedIn(User),
-                Roles = roles
+                Roles = roles,
+                UserId = user?.Id
+            };
+        }
+        [HttpGet("Profile/{userName?}")]
+        public async Task<object> Profile(string userName)
+        {
+            var user = userName != null && !userName.Equals("undefined") ? await _userManager.FindByNameAsync(userName) : await _userManager.GetUserAsync(User);
+            var gameSummaries = _dbContext.GetGameSummaries(user.Id);
+            var catalogs = _dbContext.Catalogs;
+            return new
+            {
+                user,
+                gameSummaries,
+                catalogs
             };
         }
     }

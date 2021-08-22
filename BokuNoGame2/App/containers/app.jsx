@@ -7,6 +7,7 @@ import MainPage from './main.jsx';
 import Game from './game.jsx';
 import Login from './login.jsx'
 import Register from './register.jsx'
+import Profile from './profile.jsx'
 
 export default class App extends React.Component {
     render() {
@@ -20,6 +21,7 @@ export default class App extends React.Component {
                         <Route path='/Account/Login' component={Login} />
                         <Route path='/GameList' component={GameList} />
                         <Route path='/Game/:gameId' component={Game} />
+                        <Route path='/Account/Profile/:userName?' component={Profile} />
                     </main>
                 </div>
             </div>

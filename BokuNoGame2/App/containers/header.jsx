@@ -25,7 +25,7 @@ export default class Header extends React.Component {
                                             </li>
                                         }
                                         <li className="nav-item">
-                                            <a className="nav-link text-info">Профиль</a>
+                                            <NavLink to='/Account/Profile' className="nav-link text-info">Профиль</NavLink>
                                         </li>
                                         <li className="nav-item">
                                             <button type="button" className="nav-link btn btn-link text-info" onClick={e => logout()}>Выйти</button>

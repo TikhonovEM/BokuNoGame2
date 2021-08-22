@@ -4,7 +4,6 @@
 // Write your JavaScript code.
 
 function logout() {
-    console.log("debug");
     fetch("/api/Account/Logout", {
         method: "POST"
     }).then(response => {
