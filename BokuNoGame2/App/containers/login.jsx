@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Redirect } from 'react-router-dom';
 import './css/login.css';
 
 export default class Login extends React.Component {
@@ -8,7 +8,8 @@ export default class Login extends React.Component {
         this.state = {
             login: null,
             password: null,
-            rememberMe: false
+            rememberMe: false,
+            redirect: false
         };
 
         this.inputHandler = this.inputHandler.bind(this);
@@ -25,7 +26,11 @@ export default class Login extends React.Component {
         event.preventDefault();
         fetch("/api/Account/Login", {
             method: "POST",
-            body: JSON.stringify(this.state),
+            body: JSON.stringify({
+                'login': this.state.login,
+                'password': this.state.password,
+                'rememberMe': this.state.rememberMe
+            }),
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -33,13 +38,15 @@ export default class Login extends React.Component {
             if (response.status == 200) {                
                 response.json().then(res => {
                     localStorage.setItem("userInfo", JSON.stringify(res));
-                    window.location.replace('/');
+                    this.setState({ redirect: true });
                 })
             }
         });
     }
 
     render() {
+        if (this.state.redirect)
+            return (<Redirect push to='/' />);
         return (
             <div id="logreg-forms">
                 <div className="card rounded-0">

@@ -34751,7 +34751,8 @@ var Login = function (_React$Component) {
         _this.state = {
             login: null,
             password: null,
-            rememberMe: false
+            rememberMe: false,
+            redirect: false
         };
 
         _this.inputHandler = _this.inputHandler.bind(_this);
@@ -34769,10 +34770,16 @@ var Login = function (_React$Component) {
     }, {
         key: 'submitHandler',
         value: function submitHandler(event) {
+            var _this2 = this;
+
             event.preventDefault();
             fetch("/api/Account/Login", {
                 method: "POST",
-                body: JSON.stringify(this.state),
+                body: JSON.stringify({
+                    'login': this.state.login,
+                    'password': this.state.password,
+                    'rememberMe': this.state.rememberMe
+                }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -34780,7 +34787,7 @@ var Login = function (_React$Component) {
                 if (response.status == 200) {
                     response.json().then(function (res) {
                         localStorage.setItem("userInfo", JSON.stringify(res));
-                        window.location.replace('/');
+                        _this2.setState({ redirect: true });
                     });
                 }
             });
@@ -34788,6 +34795,7 @@ var Login = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            if (this.state.redirect) return _react2.default.createElement(_reactRouterDom.Redirect, { push: true, to: '/' });
             return _react2.default.createElement(
                 'div',
                 { id: 'logreg-forms' },
@@ -34903,6 +34911,8 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
+var _reactRouterDom = __webpack_require__(3);
+
 __webpack_require__(74);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -34926,7 +34936,8 @@ var Register = function (_React$Component) {
         _this.state = {
             login: null,
             password: null,
-            confirmPassword: null
+            confirmPassword: null,
+            redirect: false
         };
 
         _this.inputHandler = _this.inputHandler.bind(_this);
@@ -34944,6 +34955,8 @@ var Register = function (_React$Component) {
     }, {
         key: 'submitHandler',
         value: function submitHandler(event) {
+            var _this2 = this;
+
             event.preventDefault();
             var validation = document.getElementById("validation");
 
@@ -34954,7 +34967,10 @@ var Register = function (_React$Component) {
 
             fetch("/api/Account/Register", {
                 method: "POST",
-                body: JSON.stringify(this.state),
+                body: JSON.stringify({
+                    'login': this.state.login,
+                    'password': this.state.password
+                }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -34962,7 +34978,7 @@ var Register = function (_React$Component) {
                 if (response.status == 200) {
                     response.json().then(function (res) {
                         localStorage.setItem("userInfo", JSON.stringify(res));
-                        window.location.replace('/');
+                        _this2.setState({ redirect: true });
                     });
                 } else {
                     response.json().then(function (res) {
@@ -34974,6 +34990,7 @@ var Register = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            if (this.state.redirect) return _react2.default.createElement(_reactRouterDom.Redirect, { push: true, to: '/' });
             return _react2.default.createElement(
                 'div',
                 { id: 'logreg-forms' },

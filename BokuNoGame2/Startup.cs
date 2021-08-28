@@ -36,14 +36,7 @@ namespace BokuNoGame2
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 });*/
 
-            services.AddIdentity<User, IdentityRole>(options =>
-            {
-                options.Password.RequiredLength = 3;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireDigit = false;
-            })
+            services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<UserContext>();
 
             var defaultConnection = Configuration.GetConnectionString("DefaultConnection");
@@ -69,11 +62,23 @@ namespace BokuNoGame2
                     options.UseNpgsql(accountConnection));
             }
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(options =>
+            services.Configure<IdentityOptions>(options =>
             {
-                options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
-                options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
+                options.Password.RequiredLength = 3;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireDigit = false;
+            });
+            services.ConfigureApplicationCookie(options =>
+            {
+                // Cookie settings
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+
+                options.LoginPath = new PathString("/Account/Login");
+                options.AccessDeniedPath = new PathString("/Account/Login");
+                options.SlidingExpiration = true;
             });
 
             services.AddAuthorization();
@@ -91,18 +96,18 @@ namespace BokuNoGame2
                 app.UseDeveloperExceptionPage();
                 app.UseWebpackDevMiddleware();
             }
+            app.UseStaticFiles();
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-            app.UseStaticFiles();
+            
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "DefaultApi",
                     template: "api/{controller}/{action}");
                 routes.MapSpaFallbackRoute("spa-fallback", new { controller = "Home", action = "Index" });
-            });
+            });           
         }
     }
 }

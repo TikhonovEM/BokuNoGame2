@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { Redirect } from 'react-router-dom';
 import './css/register.css';
 
 export default class Register extends React.Component {
@@ -7,7 +8,8 @@ export default class Register extends React.Component {
         this.state = {
             login: null,
             password: null,
-            confirmPassword: null
+            confirmPassword: null,
+            redirect: false
         };
 
         this.inputHandler = this.inputHandler.bind(this);
@@ -31,7 +33,10 @@ export default class Register extends React.Component {
 
         fetch("/api/Account/Register", {
             method: "POST",
-            body: JSON.stringify(this.state),
+            body: JSON.stringify({
+                'login': this.state.login,
+                'password': this.state.password
+            }),
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -39,7 +44,7 @@ export default class Register extends React.Component {
             if (response.status == 200) {
                 response.json().then(res => {
                     localStorage.setItem("userInfo", JSON.stringify(res));
-                    window.location.replace('/');
+                    this.setState({ redirect: true });
                 })
             }
             else {               
@@ -51,6 +56,8 @@ export default class Register extends React.Component {
     }
 
     render() {
+        if (this.state.redirect)
+            return (<Redirect push to='/' />);
         return (
             <div id="logreg-forms">
                 <div className="card rounded-0">
