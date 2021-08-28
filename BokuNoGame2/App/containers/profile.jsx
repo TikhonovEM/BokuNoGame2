@@ -8,8 +8,76 @@ export default class Game extends React.Component {
 
         this.state = {
             data: {},
-            isFetching: true
+            isFetching: true,
+            nickname: null,
+            fullName: null,
+            email: null,
+            birthDate: null
         };
+
+        this.submitHandler = this.submitHandler.bind(this);
+        this.inputHandler = this.inputHandler.bind(this);
+        this.exportLibraries = this.exportLibraries.bind(this);
+        this.importLibraries = this.importLibraries.bind(this);
+        this.loadPhoto = this.loadPhoto.bind(this);
+    }
+
+    exportLibraries(event) {
+        alert("Coming Soon...");
+    }
+
+    importLibraries(event) {
+        alert("Coming Soon...");
+    }
+
+    loadPhoto(event) {
+        var formData = new FormData();
+        var photo = document.getElementById("profile-photo-file").files[0];
+        formData.append("file", photo);
+        fetch("/api/Account/LoadPhoto", {
+            method: "POST",
+            body: formData
+        }).then(response => {
+            if (response.status == 200) {
+                response.json().then(res => {
+                    this.setState({
+                        data: res
+                    })
+                });
+            }
+        });
+
+    }
+
+    inputHandler(event) {
+        const name = event.target.name;
+        const value = event.target.value;
+        this.setState({ [name]: value });
+    }
+
+    submitHandler(event) {
+        event.preventDefault();
+        fetch("/api/Account/EditProfile", {
+            method: "POST",
+            body: JSON.stringify({
+                "nickname": this.state.nickname,
+                "fullName": this.state.fullName,
+                "email": this.state.email,
+                "birthDate": this.state.birthDate === "" ? null : this.state.birthDate
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.status == 200) {
+                response.json().then(res => {
+                    alert("Профиль обновлен!");
+                    this.setState({
+                        data: res
+                    })
+                });
+            }
+        });
     }
 
     componentDidMount() {
@@ -43,8 +111,8 @@ export default class Game extends React.Component {
                                     ? <form id="profile-photo" asp-controller="Account" asp-action="LoadPhoto" enctype="multipart/form-data" method="post">
                                         <div className="file">
                                             <label>
-                                                <input type="file" id="file" name="file" style={{ display: "none"}} />
-                                                <img src={"data:image;base64," + this.state.data.user.photo} alt="" style={{ maxWidth:"300px", maxHeight:"400px"}} />
+                                                <input type="file" id="profile-photo-file" name="file" accept="image/*" style={{ display: "none" }} onChange={this.loadPhoto} />
+                                                <img src={"data:image;base64," + this.state.data.user.photo} alt="" style={{ maxWidth: "300px", maxHeight: "400px" }} />
                                             </label>
                                         </div>
                                     </form>
@@ -140,14 +208,14 @@ export default class Game extends React.Component {
                         <div className="col-md-2">
                             <button type="button" className="btn btn-info w-100" data-toggle="modal" data-target="#exampleModal">
                                 Изменить профиль
-                </button>
-                            <a asp-action="ExportSummaries" className="btn btn-info">
+                            </button>
+                            <button className="btn btn-info" onClick={this.exportLibraries}>
                                 Экспортировать библиотеку
-                </a>
-                            <form className="form-inline" asp-action="ImportSummaries" method="post" enctype="multipart/form-data" id="import-lib">
+                            </button>
+                            <form className="form-inline" method="post" enctype="multipart/form-data" id="import-lib">
                                 <div className="import">
                                     <label>
-                                    <input className="btn btn-info" type="file" id="jsonfile" name="jsonfile" style={{ display: "none" }} />
+                                        <input className="btn btn-info" type="file" id="jsonfile" name="jsonfile" style={{ display: "none" }} onChange={this.importLibraries} />
                                         <span className="btn btn-info">Импортировать библиотеку</span>
                                     </label>
                                 </div>
@@ -161,36 +229,36 @@ export default class Game extends React.Component {
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
-                                        <form asp-action="EditProfile" asp-route-user="@Model" method="post">
+                                        <form method="post">
                                             <div className="modal-body">
                                                 <div className="form-group row">
-                                                    <label asp-for="@Model.User.Nickname" className="col-sm-4 col-form-label">Никнейм</label>
+                                                    <label for="nickname" className="col-sm-4 col-form-label">Никнейм</label>
                                                     <div className="col-sm-3">
-                                                        <input type="text" asp-for="@Model.User.Nickname" size="35" />
+                                                        <input type="text" id="nickname" name="nickname" size="35" onInput={this.inputHandler} />
                                                     </div>
                                                 </div>
                                                 <div className="form-group row">
-                                                    <label asp-for="@Model.User.FullName" className="col-sm-4 col-form-label">Полное имя</label>
+                                                    <label for="fullName" className="col-sm-4 col-form-label">Полное имя</label>
                                                     <div className="col-sm-3">
-                                                        <input type="text" asp-for="@Model.User.FullName" size="35" />
+                                                        <input type="text" id="fullName" name="fullName" size="35" onInput={this.inputHandler} />
                                                     </div>
                                                 </div>
                                                 <div className="form-group row">
-                                                    <label asp-for="@Model.User.Email" className="col-sm-4 col-form-label">Email</label>
+                                                    <label for="email" className="col-sm-4 col-form-label">Email</label>
                                                     <div className="col-sm-3">
-                                                        <input type="email" asp-for="@Model.User.Email" size="35" />
+                                                        <input type="email" id="email" name="email" size="35" onInput={this.inputHandler} />
                                                     </div>
                                                 </div>
                                                 <div className="form-group row">
-                                                    <label asp-for="@Model.User.BirthDate" className="col-sm-4 col-form-label">Дата рождения</label>
+                                                    <label for="birthDate" className="col-sm-4 col-form-label">Дата рождения</label>
                                                     <div className="col-sm-3">
-                                                        <input type="date" asp-for="@Model.User.BirthDate" />
+                                                        <input type="date" name="birthDate" name="birthDate" onInput={this.inputHandler} />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="modal-footer">
                                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-                                                <input type="submit" className="btn btn-primary" value="Обновить" />
+                                                <button type="submit" className="btn btn-primary" data-dismiss="modal" onClick={this.submitHandler}>Обновить</button>
                                             </div>
                                         </form>
                                     </div>
@@ -215,7 +283,7 @@ export default class Game extends React.Component {
                     })
                     }
                 </ul>
-                <div style={{ width:"90%", margin:"0 auto"}}>
+                <div style={{ width: "90%", margin: "0 auto" }}>
                     <table id="userGameSummaries" className="table table-striped table-bordered dt-responsive nowrap" width="100%" cellSpacing="0">
                         <thead>
                             <tr>

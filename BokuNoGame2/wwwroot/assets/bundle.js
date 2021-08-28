@@ -35029,6 +35029,8 @@ var _reactRouterDom = __webpack_require__(3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -35045,15 +35047,91 @@ var Game = function (_React$Component) {
 
         _this.state = {
             data: {},
-            isFetching: true
+            isFetching: true,
+            nickname: null,
+            fullName: null,
+            email: null,
+            birthDate: null
         };
+
+        _this.submitHandler = _this.submitHandler.bind(_this);
+        _this.inputHandler = _this.inputHandler.bind(_this);
+        _this.exportLibraries = _this.exportLibraries.bind(_this);
+        _this.importLibraries = _this.importLibraries.bind(_this);
+        _this.loadPhoto = _this.loadPhoto.bind(_this);
         return _this;
     }
 
     _createClass(Game, [{
+        key: 'exportLibraries',
+        value: function exportLibraries(event) {
+            alert("Coming Soon...");
+        }
+    }, {
+        key: 'importLibraries',
+        value: function importLibraries(event) {
+            alert("Coming Soon...");
+        }
+    }, {
+        key: 'loadPhoto',
+        value: function loadPhoto(event) {
+            var _this2 = this;
+
+            var formData = new FormData();
+            var photo = document.getElementById("profile-photo-file").files[0];
+            formData.append("file", photo);
+            fetch("/api/Account/LoadPhoto", {
+                method: "POST",
+                body: formData
+            }).then(function (response) {
+                if (response.status == 200) {
+                    response.json().then(function (res) {
+                        _this2.setState({
+                            data: res
+                        });
+                    });
+                }
+            });
+        }
+    }, {
+        key: 'inputHandler',
+        value: function inputHandler(event) {
+            var name = event.target.name;
+            var value = event.target.value;
+            this.setState(_defineProperty({}, name, value));
+        }
+    }, {
+        key: 'submitHandler',
+        value: function submitHandler(event) {
+            var _this3 = this;
+
+            event.preventDefault();
+            fetch("/api/Account/EditProfile", {
+                method: "POST",
+                body: JSON.stringify({
+                    "nickname": this.state.nickname,
+                    "fullName": this.state.fullName,
+                    "email": this.state.email,
+                    "birthDate": this.state.birthDate === "" ? null : this.state.birthDate
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (response) {
+                if (response.status == 200) {
+                    response.json().then(function (res) {
+                        alert("Профиль обновлен!");
+                        _this3.setState({
+                            data: res
+                        });
+                    });
+                }
+            });
+        }
+    }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
-            var _this2 = this;
+            var _this4 = this;
 
             var opts = {
                 method: 'GET',
@@ -35066,7 +35144,7 @@ var Game = function (_React$Component) {
             fetch("/api/Account/Profile/" + this.props.match.params.userName, opts).then(function (res) {
                 return res.json();
             }).then(function (result) {
-                return _this2.setState({
+                return _this4.setState({
                     data: result,
                     isFetching: false
                 });
@@ -35075,6 +35153,8 @@ var Game = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            var _React$createElement;
+
             var userInfo = JSON.parse(localStorage.getItem("userInfo"));
             if (this.state.isFetching) return _react2.default.createElement(
                 'div',
@@ -35102,7 +35182,7 @@ var Game = function (_React$Component) {
                                     _react2.default.createElement(
                                         'label',
                                         null,
-                                        _react2.default.createElement('input', { type: 'file', id: 'file', name: 'file', style: { display: "none" } }),
+                                        _react2.default.createElement('input', { type: 'file', id: 'profile-photo-file', name: 'file', accept: 'image/*', style: { display: "none" }, onChange: this.loadPhoto }),
                                         _react2.default.createElement('img', { src: "data:image;base64," + this.state.data.user.photo, alt: '', style: { maxWidth: "300px", maxHeight: "400px" } })
                                     )
                                 )
@@ -35333,20 +35413,20 @@ var Game = function (_React$Component) {
                             '\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043F\u0440\u043E\u0444\u0438\u043B\u044C'
                         ),
                         _react2.default.createElement(
-                            'a',
-                            { 'asp-action': 'ExportSummaries', className: 'btn btn-info' },
+                            'button',
+                            { className: 'btn btn-info', onClick: this.exportLibraries },
                             '\u042D\u043A\u0441\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0431\u0438\u0431\u043B\u0438\u043E\u0442\u0435\u043A\u0443'
                         ),
                         _react2.default.createElement(
                             'form',
-                            { className: 'form-inline', 'asp-action': 'ImportSummaries', method: 'post', enctype: 'multipart/form-data', id: 'import-lib' },
+                            { className: 'form-inline', method: 'post', enctype: 'multipart/form-data', id: 'import-lib' },
                             _react2.default.createElement(
                                 'div',
                                 { className: 'import' },
                                 _react2.default.createElement(
                                     'label',
                                     null,
-                                    _react2.default.createElement('input', { className: 'btn btn-info', type: 'file', id: 'jsonfile', name: 'jsonfile', style: { display: "none" } }),
+                                    _react2.default.createElement('input', { className: 'btn btn-info', type: 'file', id: 'jsonfile', name: 'jsonfile', style: { display: "none" }, onChange: this.importLibraries }),
                                     _react2.default.createElement(
                                         'span',
                                         { className: 'btn btn-info' },
@@ -35384,7 +35464,7 @@ var Game = function (_React$Component) {
                                     ),
                                     _react2.default.createElement(
                                         'form',
-                                        { 'asp-action': 'EditProfile', 'asp-route-user': '@Model', method: 'post' },
+                                        { method: 'post' },
                                         _react2.default.createElement(
                                             'div',
                                             { className: 'modal-body' },
@@ -35393,13 +35473,13 @@ var Game = function (_React$Component) {
                                                 { className: 'form-group row' },
                                                 _react2.default.createElement(
                                                     'label',
-                                                    { 'asp-for': '@Model.User.Nickname', className: 'col-sm-4 col-form-label' },
+                                                    { 'for': 'nickname', className: 'col-sm-4 col-form-label' },
                                                     '\u041D\u0438\u043A\u043D\u0435\u0439\u043C'
                                                 ),
                                                 _react2.default.createElement(
                                                     'div',
                                                     { className: 'col-sm-3' },
-                                                    _react2.default.createElement('input', { type: 'text', 'asp-for': '@Model.User.Nickname', size: '35' })
+                                                    _react2.default.createElement('input', { type: 'text', id: 'nickname', name: 'nickname', size: '35', onInput: this.inputHandler })
                                                 )
                                             ),
                                             _react2.default.createElement(
@@ -35407,13 +35487,13 @@ var Game = function (_React$Component) {
                                                 { className: 'form-group row' },
                                                 _react2.default.createElement(
                                                     'label',
-                                                    { 'asp-for': '@Model.User.FullName', className: 'col-sm-4 col-form-label' },
+                                                    { 'for': 'fullName', className: 'col-sm-4 col-form-label' },
                                                     '\u041F\u043E\u043B\u043D\u043E\u0435 \u0438\u043C\u044F'
                                                 ),
                                                 _react2.default.createElement(
                                                     'div',
                                                     { className: 'col-sm-3' },
-                                                    _react2.default.createElement('input', { type: 'text', 'asp-for': '@Model.User.FullName', size: '35' })
+                                                    _react2.default.createElement('input', { type: 'text', id: 'fullName', name: 'fullName', size: '35', onInput: this.inputHandler })
                                                 )
                                             ),
                                             _react2.default.createElement(
@@ -35421,13 +35501,13 @@ var Game = function (_React$Component) {
                                                 { className: 'form-group row' },
                                                 _react2.default.createElement(
                                                     'label',
-                                                    { 'asp-for': '@Model.User.Email', className: 'col-sm-4 col-form-label' },
+                                                    { 'for': 'email', className: 'col-sm-4 col-form-label' },
                                                     'Email'
                                                 ),
                                                 _react2.default.createElement(
                                                     'div',
                                                     { className: 'col-sm-3' },
-                                                    _react2.default.createElement('input', { type: 'email', 'asp-for': '@Model.User.Email', size: '35' })
+                                                    _react2.default.createElement('input', { type: 'email', id: 'email', name: 'email', size: '35', onInput: this.inputHandler })
                                                 )
                                             ),
                                             _react2.default.createElement(
@@ -35435,13 +35515,13 @@ var Game = function (_React$Component) {
                                                 { className: 'form-group row' },
                                                 _react2.default.createElement(
                                                     'label',
-                                                    { 'asp-for': '@Model.User.BirthDate', className: 'col-sm-4 col-form-label' },
+                                                    { 'for': 'birthDate', className: 'col-sm-4 col-form-label' },
                                                     '\u0414\u0430\u0442\u0430 \u0440\u043E\u0436\u0434\u0435\u043D\u0438\u044F'
                                                 ),
                                                 _react2.default.createElement(
                                                     'div',
                                                     { className: 'col-sm-3' },
-                                                    _react2.default.createElement('input', { type: 'date', 'asp-for': '@Model.User.BirthDate' })
+                                                    _react2.default.createElement('input', (_React$createElement = { type: 'date', name: 'birthDate' }, _defineProperty(_React$createElement, 'name', 'birthDate'), _defineProperty(_React$createElement, 'onInput', this.inputHandler), _React$createElement))
                                                 )
                                             )
                                         ),
@@ -35453,7 +35533,11 @@ var Game = function (_React$Component) {
                                                 { type: 'button', className: 'btn btn-secondary', 'data-dismiss': 'modal' },
                                                 '\u0417\u0430\u043A\u0440\u044B\u0442\u044C'
                                             ),
-                                            _react2.default.createElement('input', { type: 'submit', className: 'btn btn-primary', value: '\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C' })
+                                            _react2.default.createElement(
+                                                'button',
+                                                { type: 'submit', className: 'btn btn-primary', 'data-dismiss': 'modal', onClick: this.submitHandler },
+                                                '\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C'
+                                            )
                                         )
                                     )
                                 )
