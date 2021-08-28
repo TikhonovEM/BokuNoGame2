@@ -10,15 +10,18 @@ export default class Login extends React.Component {
             password: null,
             rememberMe: false
         };
+
+        this.inputHandler = this.inputHandler.bind(this);
+        this.submitHandler = this.submitHandler.bind(this);
     }
 
-    inputHandler = (event) => {
+    inputHandler(event) {
         const name = event.target.name;
         const value = event.target.value;
         this.setState({ [name]: value });
     }
 
-    submitHandler = (event) => {
+    submitHandler(event) {
         event.preventDefault();
         fetch("/api/Account/Login", {
             method: "POST",

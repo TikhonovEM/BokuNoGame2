@@ -34748,17 +34748,31 @@ var Login = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (Login.__proto__ || Object.getPrototypeOf(Login)).call(this, props));
 
-        _this.inputHandler = function (event) {
-            var name = event.target.name;
-            var value = event.target.value;
-            _this.setState(_defineProperty({}, name, value));
+        _this.state = {
+            login: null,
+            password: null,
+            rememberMe: false
         };
 
-        _this.submitHandler = function (event) {
+        _this.inputHandler = _this.inputHandler.bind(_this);
+        _this.submitHandler = _this.submitHandler.bind(_this);
+        return _this;
+    }
+
+    _createClass(Login, [{
+        key: 'inputHandler',
+        value: function inputHandler(event) {
+            var name = event.target.name;
+            var value = event.target.value;
+            this.setState(_defineProperty({}, name, value));
+        }
+    }, {
+        key: 'submitHandler',
+        value: function submitHandler(event) {
             event.preventDefault();
             fetch("/api/Account/Login", {
                 method: "POST",
-                body: JSON.stringify(_this.state),
+                body: JSON.stringify(this.state),
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -34770,17 +34784,8 @@ var Login = function (_React$Component) {
                     });
                 }
             });
-        };
-
-        _this.state = {
-            login: null,
-            password: null,
-            rememberMe: false
-        };
-        return _this;
-    }
-
-    _createClass(Login, [{
+        }
+    }, {
         key: 'render',
         value: function render() {
             return _react2.default.createElement(
@@ -34902,6 +34907,8 @@ __webpack_require__(74);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -34911,13 +34918,60 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Register = function (_React$Component) {
     _inherits(Register, _React$Component);
 
-    function Register() {
+    function Register(props) {
         _classCallCheck(this, Register);
 
-        return _possibleConstructorReturn(this, (Register.__proto__ || Object.getPrototypeOf(Register)).apply(this, arguments));
+        var _this = _possibleConstructorReturn(this, (Register.__proto__ || Object.getPrototypeOf(Register)).call(this, props));
+
+        _this.state = {
+            login: null,
+            password: null,
+            confirmPassword: null
+        };
+
+        _this.inputHandler = _this.inputHandler.bind(_this);
+        _this.submitHandler = _this.submitHandler.bind(_this);
+        return _this;
     }
 
     _createClass(Register, [{
+        key: 'inputHandler',
+        value: function inputHandler(event) {
+            var name = event.target.name;
+            var value = event.target.value;
+            this.setState(_defineProperty({}, name, value));
+        }
+    }, {
+        key: 'submitHandler',
+        value: function submitHandler(event) {
+            event.preventDefault();
+            var validation = document.getElementById("validation");
+
+            if (this.state.password !== this.state.confirmPassword) {
+                validation.innerText = "Введенные пароли не совпадают!";
+                return;
+            }
+
+            fetch("/api/Account/Register", {
+                method: "POST",
+                body: JSON.stringify(this.state),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (response) {
+                if (response.status == 200) {
+                    response.json().then(function (res) {
+                        localStorage.setItem("userInfo", JSON.stringify(res));
+                        window.location.replace('/');
+                    });
+                } else {
+                    response.json().then(function (res) {
+                        validation.innerText = res.errors.join('\n');
+                    });
+                }
+            });
+        }
+    }, {
         key: 'render',
         value: function render() {
             return _react2.default.createElement(
@@ -34928,8 +34982,8 @@ var Register = function (_React$Component) {
                     { className: 'card rounded-0' },
                     _react2.default.createElement(
                         'form',
-                        { className: 'form-signin', 'asp-action': 'Register', 'asp-controller': 'Account', method: 'post' },
-                        _react2.default.createElement('div', { className: 'validation', 'asp-validation-summary': 'ModelOnly' }),
+                        { className: 'form-signin', method: 'post', onSubmit: this.submitHandler },
+                        _react2.default.createElement('div', { id: 'validation' }),
                         _react2.default.createElement(
                             'h1',
                             { className: 'h3 mb-3 font-weight-normal card-header', style: { textAlign: "center" } },
@@ -34938,9 +34992,9 @@ var Register = function (_React$Component) {
                         _react2.default.createElement(
                             'div',
                             { className: 'card-body' },
-                            _react2.default.createElement('input', { type: 'text', 'asp-for': 'Login', className: 'form-control', placeholder: '\u041B\u043E\u0433\u0438\u043D', required: '', autofocus: '' }),
-                            _react2.default.createElement('input', { type: 'password', 'asp-for': 'Password', className: 'form-control', placeholder: '\u041F\u0430\u0440\u043E\u043B\u044C', required: '' }),
-                            _react2.default.createElement('input', { type: 'password', 'asp-for': 'ConfirmPassword', className: 'form-control', placeholder: '\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0430\u0440\u043E\u043B\u044C', required: '' }),
+                            _react2.default.createElement('input', { type: 'text', name: 'login', className: 'form-control', placeholder: '\u041B\u043E\u0433\u0438\u043D', required: '', autofocus: '', onChange: this.inputHandler }),
+                            _react2.default.createElement('input', { type: 'password', name: 'password', className: 'form-control', placeholder: '\u041F\u0430\u0440\u043E\u043B\u044C', required: '', onChange: this.inputHandler }),
+                            _react2.default.createElement('input', { type: 'password', name: 'confirmPassword', className: 'form-control', placeholder: '\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0430\u0440\u043E\u043B\u044C', required: '', onChange: this.inputHandler }),
                             _react2.default.createElement(
                                 'button',
                                 { className: 'btn btn-success w-100', type: 'submit' },

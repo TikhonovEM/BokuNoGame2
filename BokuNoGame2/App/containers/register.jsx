@@ -2,21 +2,68 @@
 import './css/register.css';
 
 export default class Register extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            login: null,
+            password: null,
+            confirmPassword: null
+        };
+
+        this.inputHandler = this.inputHandler.bind(this);
+        this.submitHandler = this.submitHandler.bind(this);
+    }
+
+    inputHandler(event) {
+        const name = event.target.name;
+        const value = event.target.value;
+        this.setState({ [name]: value });
+    }
+
+    submitHandler(event) {
+        event.preventDefault();
+        const validation = document.getElementById("validation");
+
+        if (this.state.password !== this.state.confirmPassword) {
+            validation.innerText = "Введенные пароли не совпадают!";
+            return;
+        }
+
+        fetch("/api/Account/Register", {
+            method: "POST",
+            body: JSON.stringify(this.state),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.status == 200) {
+                response.json().then(res => {
+                    localStorage.setItem("userInfo", JSON.stringify(res));
+                    window.location.replace('/');
+                })
+            }
+            else {               
+                response.json().then(res => {
+                    validation.innerText = res.errors.join('\n');
+                })
+            }
+        });
+    }
 
     render() {
         return (
             <div id="logreg-forms">
                 <div className="card rounded-0">
-                    <form className="form-signin" asp-action="Register" asp-controller="Account" method="post">
-                        <div className="validation" asp-validation-summary="ModelOnly"></div>
+                    <form className="form-signin" method="post" onSubmit={this.submitHandler}>
+                        <div id="validation"></div>
                         <h1 className="h3 mb-3 font-weight-normal card-header" style={{ textAlign: "center"}}> Регистрация </h1>
 
                         <div className="card-body">
-                            <input type="text" asp-for="Login" className="form-control" placeholder="Логин" required="" autofocus="" />
+                            <input type="text" name="login" className="form-control" placeholder="Логин" required="" autofocus="" onChange={this.inputHandler} />
 
-                            <input type="password" asp-for="Password" className="form-control" placeholder="Пароль" required="" />
+                            <input type="password" name="password" className="form-control" placeholder="Пароль" required="" onChange={this.inputHandler} />
 
-                            <input type="password" asp-for="ConfirmPassword" className="form-control" placeholder="Повторите пароль" required="" />
+                            <input type="password" name="confirmPassword" className="form-control" placeholder="Повторите пароль" required="" onChange={this.inputHandler} />
 
                             <button className="btn btn-success w-100" type="submit"><i className="fas fa-sign-in-alt"></i> Зарегистрироваться</button>
                         </div>
