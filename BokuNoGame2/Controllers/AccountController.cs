@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -25,48 +26,63 @@ namespace BokuNoGame2.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly AppDBContext _dbContext;
+        private readonly ILogger<AccountController> _logger;
         public AccountController(UserContext userContext, UserManager<User> userManager,
-            SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, AppDBContext context)
+            SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, AppDBContext context, ILogger<AccountController> logger)
         {
             _userContext = userContext;
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _dbContext = context;
+            _logger = logger;
         }
 
         [HttpPost("Login")]
-        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Login([FromBody] LoginData login)
         {
-            if (ModelState.IsValid)
+            try
             {
-                var result =
-                    await _signInManager.PasswordSignInAsync(login.Login, login.Password, login.RememberMe, false);
+                _logger.LogDebug("Login attempt for {0}:{1}", login.Login, login.Password);
+                var result = await _signInManager.PasswordSignInAsync(login.Login, login.Password, login.RememberMe, false);
                 if (result.Succeeded)
                     return Ok(await UserInfo());
                 else
-                    ModelState.AddModelError("", "Неправильный логин и (или) пароль");
+                    return StatusCode(400, new { Errors = "не удалось :(" });
             }
-            return StatusCode(400);
+            catch (Exception e)
+            {
+                _logger.LogError("Login attempt failed for {0}:{1}. Result: {2}", login.Login, login.Password, e.Message);
+                return StatusCode(400, new { Errors = e.Message });
+            }
         }
 
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] LoginData data)
         {
-            var user = new User { UserName = data.Login };
-            user.Photo = System.IO.File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Files", "default-avatar.jpg"));
-            // добавляем пользователя
-            var result = await _userManager.CreateAsync(user, data.Password);
-            if (result.Succeeded)
+            try
             {
-                // установка куки
-                await _userManager.AddToRoleAsync(user, "User");
-                await _signInManager.SignInAsync(user, false);
-                return Ok(await UserInfo());
+                var user = new User { UserName = data.Login };
+                var defaultAvatarPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Files", "default-avatar.jpg");
+                _logger.LogDebug("defaultAvatarPath = '{0}'", defaultAvatarPath);
+                user.Photo = System.IO.File.ReadAllBytes(defaultAvatarPath);
+                // добавляем пользователя
+                var result = await _userManager.CreateAsync(user, data.Password);
+                if (result.Succeeded)
+                {
+                    // установка куки
+                    await _userManager.AddToRoleAsync(user, "User");
+                    await _signInManager.SignInAsync(user, false);
+                    return Ok(await UserInfo());
+                }
+                else
+                    return StatusCode(400, new { Errors = result.Errors.Select(e => e.Description) });
             }
-            else                
-                return StatusCode(400, new { Errors = result.Errors.Select(e => e.Description) });
+            catch (Exception e)
+            {
+                _logger.LogError("Error while Register: {0}", e.Message);
+                return StatusCode(400, new { Errors = e.Message });
+            }
         }
 
         [HttpPost("Logout")]

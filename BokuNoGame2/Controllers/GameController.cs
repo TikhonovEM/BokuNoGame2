@@ -84,5 +84,29 @@ namespace BokuNoGame2.Controllers
 
             return new { games = gameList, pagination };
         }
+
+        [HttpPost("PostPing")]
+        public async Task<IActionResult> PostPing([FromBody] string name)
+        {
+            try
+            {
+                var game = new Game();
+                game.Name = name;
+                game.Description = "test";
+                game.AgeRating = "test";
+                game.Developer = "test";
+                game.Genre = Genre.Strategy;
+                game.Publisher = "test";
+                game.ReleaseDate = DateTime.Today;
+                await _context.Games.AddAsync(game);
+                await _context.SaveChangesAsync();
+                return Ok(game.Id);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(469, new { Errors = e.Message });
+            }
+            
+        }
     }
 }
