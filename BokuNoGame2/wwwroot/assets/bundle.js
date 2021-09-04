@@ -34412,6 +34412,8 @@ var _reactRouterDom = __webpack_require__(3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -34421,19 +34423,401 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var MainPage = function (_React$Component) {
     _inherits(MainPage, _React$Component);
 
-    function MainPage() {
+    function MainPage(props) {
         _classCallCheck(this, MainPage);
 
-        return _possibleConstructorReturn(this, (MainPage.__proto__ || Object.getPrototypeOf(MainPage)).apply(this, arguments));
+        var _this = _possibleConstructorReturn(this, (MainPage.__proto__ || Object.getPrototypeOf(MainPage)).call(this, props));
+
+        _this.state = {
+            isFetchingGames: true,
+            isFetchingLocalNews: true,
+            isFetchingGlobalNews: true,
+            games: {},
+            localNews: {},
+            globalNews: {},
+            title: null,
+            text: null,
+            reference: null
+        };
+
+        _this.inputHandler = _this.inputHandler.bind(_this);
+        _this.submitHandler = _this.submitHandler.bind(_this);
+        return _this;
     }
 
     _createClass(MainPage, [{
+        key: 'inputHandler',
+        value: function inputHandler(event) {
+            var name = event.target.name;
+            var value = event.target.value;
+            this.setState(_defineProperty({}, name, value));
+        }
+    }, {
+        key: 'submitHandler',
+        value: function submitHandler(event, isLocal) {
+            var _this2 = this;
+
+            event.preventDefault();
+            var opts = {
+                method: "POST",
+                body: JSON.stringify({
+                    title: this.state.title,
+                    text: this.state.text,
+                    reference: this.state.reference,
+                    isLocal: isLocal
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            fetch("/api/Game/CreateNews", opts).then(function (response) {
+                if (response.status == 200) {
+                    response.json().then(function (res) {
+                        _this2.setState(_defineProperty({}, res.sourceName, res.data));
+                    });
+                }
+            });
+        }
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            var _this3 = this;
+
+            var opts = {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Accept-Encoding': 'gzip;q=1.0, compress;q=0.5'
+                }
+            };
+            fetch("/api/Game/GetTopMostPopularGames?top=8", opts).then(function (res) {
+                return res.json();
+            }).then(function (result) {
+                return _this3.setState({
+                    games: result,
+                    isFetchingGames: false
+                });
+            });
+
+            fetch("/api/Game/GetNews?isLocal=false", opts).then(function (res) {
+                return res.json();
+            }).then(function (result) {
+                return _this3.setState({
+                    globalNews: result,
+                    isFetchingGlobalNews: false
+                });
+            });
+
+            fetch("/api/Game/GetNews?isLocal=true", opts).then(function (res) {
+                return res.json();
+            }).then(function (result) {
+                return _this3.setState({
+                    localNews: result,
+                    isFetchingLocalNews: false
+                });
+            });
+        }
+    }, {
         key: 'render',
         value: function render() {
+            var _this4 = this;
+
+            if (this.state.isFetchingGames || this.state.isFetchingGlobalNews || this.state.isFetchingLocalNews) return _react2.default.createElement(
+                'div',
+                null,
+                '...Loading'
+            );
             return _react2.default.createElement(
                 'div',
                 null,
-                'MainPage'
+                _react2.default.createElement(
+                    'div',
+                    { className: 'text-center' },
+                    _react2.default.createElement(
+                        'h1',
+                        { className: 'display-4' },
+                        '\u0414\u043E\u0431\u0440\u043E \u043F\u043E\u0436\u0430\u043B\u043E\u0432\u0430\u0442\u044C \u0432 NGNL'
+                    )
+                ),
+                _react2.default.createElement(
+                    'div',
+                    null,
+                    _react2.default.createElement(
+                        'h3',
+                        { className: 'bg-secondary text-left' },
+                        '\u041F\u043E\u043F\u0443\u043B\u044F\u0440\u043D\u043E \u0441\u0440\u0435\u0434\u0438 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u0439 \u0441\u0430\u0439\u0442\u0430:'
+                    ),
+                    _react2.default.createElement(
+                        'ul',
+                        { className: 'list-inline text-center' },
+                        this.state.games.map(function (value, index, array) {
+                            return _react2.default.createElement(
+                                'li',
+                                { className: 'd-inline-block', style: { width: "11%" }, key: index },
+                                _react2.default.createElement(
+                                    _reactRouterDom.NavLink,
+                                    { to: "/Game/" + value.id, className: 'social-icon' },
+                                    _react2.default.createElement(
+                                        'div',
+                                        null,
+                                        _react2.default.createElement('img', { src: "data:image;base64," + value.logo, style: { width: "9rem", height: "12em" } })
+                                    ),
+                                    _react2.default.createElement(
+                                        'span',
+                                        { className: 'd-inline-block text-truncate', style: { maxWidth: "9rem" } },
+                                        value.name
+                                    )
+                                )
+                            );
+                        })
+                    )
+                ),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'row' },
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col-md-9 order-md-1', style: { padding: "0px" } },
+                        _react2.default.createElement(
+                            'section',
+                            null,
+                            _react2.default.createElement(
+                                'div',
+                                { className: 'row' },
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'col-md-9 text-center bg-danger' },
+                                    _react2.default.createElement(
+                                        'h3',
+                                        null,
+                                        '\u041D\u043E\u0432\u043E\u0441\u0442\u0438 \u0438\u0433\u0440\u043E\u0432\u043E\u0433\u043E \u043C\u0438\u0440\u0430'
+                                    )
+                                ),
+                                _react2.default.createElement(
+                                    'button',
+                                    { type: 'button', className: 'btn btn-danger rounded-0 col-md-3', 'data-toggle': 'modal', 'data-target': '#exampleModal' },
+                                    '\u041F\u0440\u0435\u0434\u043B\u043E\u0436\u0438\u0442\u044C \u043D\u043E\u0432\u043E\u0441\u0442\u044C'
+                                ),
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'modal fade', id: 'exampleModal', tabIndex: '-1', role: 'dialog', 'aria-labelledby': 'exampleModalLabel', 'aria-hidden': 'true' },
+                                    _react2.default.createElement(
+                                        'div',
+                                        { className: 'modal-dialog mw-100 w-50', role: 'document' },
+                                        _react2.default.createElement(
+                                            'div',
+                                            { className: 'modal-content' },
+                                            _react2.default.createElement(
+                                                'div',
+                                                { className: 'modal-header' },
+                                                _react2.default.createElement(
+                                                    'h5',
+                                                    { className: 'modal-title', id: 'exampleModalLabel' },
+                                                    '\u041D\u043E\u0432\u0430\u044F \u043D\u043E\u0432\u043E\u0441\u0442\u044C'
+                                                ),
+                                                _react2.default.createElement(
+                                                    'button',
+                                                    { type: 'button', className: 'close', 'data-dismiss': 'modal', 'aria-label': 'Close' },
+                                                    _react2.default.createElement(
+                                                        'span',
+                                                        { 'aria-hidden': 'true' },
+                                                        '\xD7'
+                                                    )
+                                                )
+                                            ),
+                                            _react2.default.createElement(
+                                                'form',
+                                                { 'asp-action': 'CreateNews', method: 'post' },
+                                                _react2.default.createElement(
+                                                    'div',
+                                                    { className: 'modal-body' },
+                                                    _react2.default.createElement(
+                                                        'div',
+                                                        { className: 'form-group row' },
+                                                        _react2.default.createElement(
+                                                            'label',
+                                                            { htmlFor: 'title', className: 'col-sm-2 col-form-label' },
+                                                            '\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A'
+                                                        ),
+                                                        _react2.default.createElement(
+                                                            'div',
+                                                            { className: 'col-sm-10' },
+                                                            _react2.default.createElement('input', { className: 'form-control', id: 'title', name: 'title', type: 'text', size: '35', onInput: this.inputHandler })
+                                                        )
+                                                    ),
+                                                    _react2.default.createElement(
+                                                        'div',
+                                                        { className: 'form-group row' },
+                                                        _react2.default.createElement(
+                                                            'label',
+                                                            { htmlFor: 'text', className: 'col-sm-2 col-form-label' },
+                                                            '\u0422\u0435\u043A\u0441\u0442'
+                                                        ),
+                                                        _react2.default.createElement(
+                                                            'div',
+                                                            { className: 'col-sm-10' },
+                                                            _react2.default.createElement('textarea', { className: 'form-control', id: 'text', name: 'text', rows: '5', cols: '60', onChange: this.inputHandler })
+                                                        )
+                                                    ),
+                                                    _react2.default.createElement(
+                                                        'div',
+                                                        { className: 'form-group row' },
+                                                        _react2.default.createElement(
+                                                            'label',
+                                                            { htmlFor: 'reference', className: 'col-sm-2 col-form-label' },
+                                                            '\u0421\u0441\u044B\u043B\u043A\u0430'
+                                                        ),
+                                                        _react2.default.createElement(
+                                                            'div',
+                                                            { className: 'col-sm-10' },
+                                                            _react2.default.createElement('input', { className: 'form-control', id: 'reference', name: 'reference', type: 'text', size: '35', onInput: this.inputHandler })
+                                                        )
+                                                    )
+                                                ),
+                                                _react2.default.createElement(
+                                                    'div',
+                                                    { className: 'modal-footer' },
+                                                    _react2.default.createElement(
+                                                        'button',
+                                                        { type: 'button', className: 'btn btn-secondary', 'data-dismiss': 'modal' },
+                                                        '\u0417\u0430\u043A\u0440\u044B\u0442\u044C'
+                                                    ),
+                                                    _react2.default.createElement(
+                                                        'button',
+                                                        { type: 'submit', className: 'btn btn-primary', 'data-dismiss': 'modal', onClick: function onClick(e) {
+                                                                return _this4.submitHandler(e, false);
+                                                            } },
+                                                        '\u041E\u043F\u0443\u0431\u043B\u0438\u043A\u043E\u0432\u0430\u0442\u044C'
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            ),
+                            _react2.default.createElement(
+                                'ul',
+                                { className: 'list-group' },
+                                this.state.globalNews.map(function (value, index, array) {
+                                    return _react2.default.createElement(
+                                        'li',
+                                        { className: 'list-group-item', key: index },
+                                        _react2.default.createElement(
+                                            'article',
+                                            { className: 'card' },
+                                            !value.reference ? _react2.default.createElement(
+                                                'div',
+                                                null,
+                                                _react2.default.createElement(
+                                                    'h4',
+                                                    { className: 'card-header text-center' },
+                                                    value.title
+                                                ),
+                                                _react2.default.createElement(
+                                                    'div',
+                                                    { className: 'card-body' },
+                                                    _react2.default.createElement(
+                                                        'p',
+                                                        { className: 'card-text' },
+                                                        value.text
+                                                    )
+                                                ),
+                                                value.authorName && _react2.default.createElement(
+                                                    'div',
+                                                    { className: 'card-footer text-muted' },
+                                                    "От " + value.authorName
+                                                )
+                                            ) : _react2.default.createElement(
+                                                'div',
+                                                null,
+                                                _react2.default.createElement(
+                                                    'h4',
+                                                    { className: 'card-header' },
+                                                    _react2.default.createElement(
+                                                        'a',
+                                                        { href: value.reference },
+                                                        value.title
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    );
+                                })
+                            )
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col-md-3 order-md-2' },
+                        _react2.default.createElement(
+                            'section',
+                            null,
+                            _react2.default.createElement(
+                                'div',
+                                { className: 'row' },
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'col-md-12 text-center bg-primary' },
+                                    _react2.default.createElement(
+                                        'h3',
+                                        null,
+                                        '\u041D\u043E\u0432\u043E\u0441\u0442\u0438 \u0441\u0435\u0440\u0432\u0438\u0441\u0430'
+                                    )
+                                ),
+                                _react2.default.createElement(
+                                    'ul',
+                                    { className: 'list-group' },
+                                    this.state.localNews.map(function (value, index, array) {
+                                        return _react2.default.createElement(
+                                            'li',
+                                            { className: 'list-group-item', key: index },
+                                            _react2.default.createElement(
+                                                'article',
+                                                { className: 'card' },
+                                                !value.reference ? _react2.default.createElement(
+                                                    'div',
+                                                    null,
+                                                    _react2.default.createElement(
+                                                        'h4',
+                                                        { className: 'card-header text-center' },
+                                                        value.title
+                                                    ),
+                                                    _react2.default.createElement(
+                                                        'div',
+                                                        { className: 'card-body' },
+                                                        _react2.default.createElement(
+                                                            'p',
+                                                            { className: 'card-text' },
+                                                            value.text
+                                                        )
+                                                    ),
+                                                    value.authorName && _react2.default.createElement(
+                                                        'div',
+                                                        { className: 'card-footer text-muted' },
+                                                        "От " + value.authorName
+                                                    )
+                                                ) : _react2.default.createElement(
+                                                    'div',
+                                                    null,
+                                                    _react2.default.createElement(
+                                                        'h4',
+                                                        { className: 'card-header' },
+                                                        _react2.default.createElement(
+                                                            'a',
+                                                            { href: value.reference },
+                                                            value.title
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        );
+                                    })
+                                )
+                            )
+                        )
+                    )
+                )
             );
         }
     }]);
