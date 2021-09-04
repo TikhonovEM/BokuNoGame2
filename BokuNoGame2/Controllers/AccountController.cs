@@ -110,7 +110,9 @@ namespace BokuNoGame2.Controllers
         [HttpGet("Profile/{userName?}")]
         public async Task<object> Profile(string userName)
         {
+            _logger.LogDebug("Attempt to get profile for '{0}'", userName);
             var user = userName != null && !userName.Equals("undefined") ? await _userManager.FindByNameAsync(userName) : await _userManager.GetUserAsync(User);
+            _logger.LogDebug("user '{0}' is found", user.UserName);
             var gameSummaries = _dbContext.GetGameSummaries(user.Id);
             var catalogs = _dbContext.Catalogs;
             return new
