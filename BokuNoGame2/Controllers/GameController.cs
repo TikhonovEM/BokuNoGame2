@@ -66,12 +66,12 @@ namespace BokuNoGame2.Controllers
             return new { game = displayGame, catalog, rate };
         }
 
-        [HttpGet("GameList")]
-        public object GameList(int page = 1)
+        [HttpPost("GameList/{page}")]
+        public object GameList(int page, [FromBody] FilterPanel filter)
         {
             var pageSize = 30;
 
-            var games = _context.Games.AsNoTracking();
+            var games = GetFilteredGameList(filter);
             var count = games.Count();
             var pagination = new Page(count, page, 30);
             var gameList = games.Skip((page - 1) * pageSize)
@@ -83,7 +83,17 @@ namespace BokuNoGame2.Controllers
                     g.Logo
                 });
 
-            return new { games = gameList, pagination };
+            var filterData = new
+            {
+                Publishers = _context.Games.Select(g => g.Publisher).Distinct(),
+                Developers = _context.Games.Select(g => g.Developer).Distinct(),
+                StartYears = Enumerable.Range(1900, DateTime.Now.Year - 1899),
+                EndYears = Enumerable.Range(1900, DateTime.Now.Year - 1899),
+                AgeRatings = _context.Games.Select(g => g.AgeRating).Distinct(),
+                Genres = Enum.GetValues(typeof(Genre)).Cast<Genre>().ToDictionary(t => (int)t, t => t.GetAttribute<DisplayAttribute>().Name)
+            };
+
+            return new { games = gameList, pagination, filterData };
         }
 
         [HttpGet("GetTopMostPopularGames")]

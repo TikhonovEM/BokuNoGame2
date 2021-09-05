@@ -34078,6 +34078,8 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = __webpack_require__(0);
@@ -34108,6 +34110,18 @@ var GameList = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (GameList.__proto__ || Object.getPrototypeOf(GameList)).call(this, props));
 
+        _this.filter = {
+            name: null,
+            genre: 0,
+            publisher: null,
+            developer: null,
+            releaseYearStart: 1900,
+            releaseYearEnd: 2021,
+            rating: 0.0,
+            ageRating: null
+        };
+
+
         _this.state = {
             data: {},
             isFetching: true
@@ -34125,14 +34139,17 @@ var GameList = function (_React$Component) {
                 isFetching: true
             });
             var opts = {
-                method: 'GET',
+                method: 'POST',
+                body: JSON.stringify(this.filter),
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Accept-Encoding': 'gzip;q=1.0, compress;q=0.5'
+                    'Content-Type': 'application/json'
                 }
             };
-            fetch('/api/Game/GameList?page=' + page, opts).then(function (res) {
+
+            console.log(opts.body);
+
+            var uri = '/api/Game/GameList/' + page;
+            fetch(uri, opts).then(function (res) {
                 return res.json();
             }).then(function (result) {
                 return _this2.setState({
@@ -34149,6 +34166,8 @@ var GameList = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            var _this3 = this;
+
             if (this.state.isFetching) return _react2.default.createElement(
                 'div',
                 null,
@@ -34209,14 +34228,280 @@ var GameList = function (_React$Component) {
                         'div',
                         { className: 'sticky-top' },
                         _react2.default.createElement(
-                            'div',
+                            'form',
                             { className: 'card' },
                             _react2.default.createElement(
                                 'div',
                                 { className: 'card-header' },
                                 '\u041F\u0430\u043D\u0435\u043B\u044C \u0444\u0438\u043B\u044C\u0442\u0440\u0430\u0446\u0438\u0438'
                             ),
-                            _react2.default.createElement('div', { className: 'card-body' }),
+                            _react2.default.createElement(
+                                'div',
+                                { className: 'card-body' },
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'form-group list-group-item' },
+                                    _react2.default.createElement(
+                                        'div',
+                                        { className: 'row' },
+                                        _react2.default.createElement(
+                                            'label',
+                                            { className: 'col-md-3 control-label', htmlFor: 'name' },
+                                            '\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435'
+                                        ),
+                                        _react2.default.createElement(
+                                            'div',
+                                            { className: 'col-md-9' },
+                                            _react2.default.createElement('input', { className: 'form-control', type: 'text', id: 'name', name: 'name', value: this.filter.name, onInput: function onInput(e) {
+                                                    return _this3.filter.name = e.target.value;
+                                                } })
+                                        )
+                                    )
+                                ),
+                                _react2.default.createElement('div', { className: 'w-100 d-none d-md-block' }),
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'form-group list-group-item' },
+                                    _react2.default.createElement(
+                                        'div',
+                                        { className: 'row' },
+                                        _react2.default.createElement(
+                                            'label',
+                                            { className: 'col-md-3 control-label', htmlFor: 'genre' },
+                                            '\u0416\u0430\u043D\u0440'
+                                        ),
+                                        _react2.default.createElement(
+                                            'div',
+                                            { className: 'col-md-9' },
+                                            _react2.default.createElement(
+                                                'select',
+                                                { className: 'form-control', id: 'genre', name: 'genre', onChange: function onChange(e) {
+                                                        return _this3.filter.genre = parseInt(e.target.value);
+                                                    } },
+                                                Object.entries(this.state.data.filterData.genres).map(function (_ref) {
+                                                    var _ref2 = _slicedToArray(_ref, 2),
+                                                        key = _ref2[0],
+                                                        value = _ref2[1];
+
+                                                    return _react2.default.createElement(
+                                                        'option',
+                                                        { key: key, value: key },
+                                                        value
+                                                    );
+                                                })
+                                            )
+                                        )
+                                    )
+                                ),
+                                _react2.default.createElement('div', { className: 'w-100 d-none d-md-block' }),
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'form-group list-group-item' },
+                                    _react2.default.createElement(
+                                        'div',
+                                        { className: 'row' },
+                                        _react2.default.createElement(
+                                            'label',
+                                            { className: 'col-md-3 control-label', htmlFor: 'publisher' },
+                                            '\u0418\u0437\u0434\u0430\u0442\u0435\u043B\u044C'
+                                        ),
+                                        _react2.default.createElement(
+                                            'div',
+                                            { className: 'col-md-9' },
+                                            _react2.default.createElement(
+                                                'select',
+                                                { className: 'form-control', id: 'publisher', name: 'publisher', onChange: function onChange(e) {
+                                                        return _this3.filter.publisher = e.target.value;
+                                                    } },
+                                                this.filter.publisher ? _react2.default.createElement(
+                                                    'option',
+                                                    { key: this.filter.publisher, selected: true },
+                                                    this.filter.publisher
+                                                ) : _react2.default.createElement(
+                                                    'option',
+                                                    { key: "Выберите издателя", selected: true, disabled: true },
+                                                    '\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0438\u0437\u0434\u0430\u0442\u0435\u043B\u044F'
+                                                ),
+                                                this.state.data.filterData.publishers.map(function (value, index, array) {
+                                                    return _react2.default.createElement(
+                                                        'option',
+                                                        { key: value },
+                                                        value
+                                                    );
+                                                })
+                                            )
+                                        )
+                                    )
+                                ),
+                                _react2.default.createElement('div', { className: 'w-100 d-none d-md-block' }),
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'form-group list-group-item' },
+                                    _react2.default.createElement(
+                                        'div',
+                                        { className: 'row' },
+                                        _react2.default.createElement(
+                                            'label',
+                                            { className: 'col-md-3 control-label', htmlFor: 'developer' },
+                                            '\u0420\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A'
+                                        ),
+                                        _react2.default.createElement(
+                                            'div',
+                                            { className: 'col-md-9' },
+                                            _react2.default.createElement(
+                                                'select',
+                                                { className: 'form-control', id: 'developer', name: 'developer', onChange: function onChange(e) {
+                                                        return _this3.filter.developer = e.target.value;
+                                                    } },
+                                                this.filter.developer ? _react2.default.createElement(
+                                                    'option',
+                                                    { key: this.filter.developer, selected: true },
+                                                    this.filter.developer
+                                                ) : _react2.default.createElement(
+                                                    'option',
+                                                    { key: "Выберите разработчика", selected: true, disabled: true },
+                                                    '\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A\u0430'
+                                                ),
+                                                this.state.data.filterData.developers.map(function (value, index, array) {
+                                                    return _react2.default.createElement(
+                                                        'option',
+                                                        { key: value },
+                                                        value
+                                                    );
+                                                })
+                                            )
+                                        )
+                                    )
+                                ),
+                                _react2.default.createElement('div', { className: 'w-100 d-none d-md-block' }),
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'form-group list-group-item' },
+                                    _react2.default.createElement(
+                                        'div',
+                                        { className: 'row' },
+                                        _react2.default.createElement(
+                                            'span',
+                                            { className: 'col-md-3' },
+                                            '\u0414\u0430\u0442\u0430 \u0432\u044B\u0445\u043E\u0434\u0430 \u0441 '
+                                        ),
+                                        _react2.default.createElement(
+                                            'div',
+                                            { className: 'col-md-9' },
+                                            _react2.default.createElement(
+                                                'select',
+                                                { className: 'form-control-sm', id: 'releaseYearStart', name: 'releaseYearStart', onChange: function onChange(e) {
+                                                        return _this3.filter.releaseYearStart = parseInt(e.target.value);
+                                                    } },
+                                                this.filter.releaseYearStart ? _react2.default.createElement(
+                                                    'option',
+                                                    { key: this.filter.releaseYearStart, selected: true },
+                                                    this.filter.releaseYearStart
+                                                ) : _react2.default.createElement(
+                                                    'option',
+                                                    { key: "Год выхода старт", selected: true, disabled: true },
+                                                    '\u0413\u043E\u0434 \u0432\u044B\u0445\u043E\u0434\u0430'
+                                                ),
+                                                this.state.data.filterData.startYears.map(function (value, index, array) {
+                                                    return _react2.default.createElement(
+                                                        'option',
+                                                        { key: value },
+                                                        value
+                                                    );
+                                                })
+                                            ),
+                                            _react2.default.createElement(
+                                                'span',
+                                                null,
+                                                '\u043F\u043E '
+                                            ),
+                                            _react2.default.createElement(
+                                                'select',
+                                                { className: 'form-control-sm', id: 'releaseYearEnd', name: 'releaseYearEnd', onChange: function onChange(e) {
+                                                        return _this3.filter.releaseYearEnd = parseInt(e.target.value);
+                                                    } },
+                                                this.filter.releaseYearEnd ? _react2.default.createElement(
+                                                    'option',
+                                                    { key: this.filter.releaseYearEnd, selected: true },
+                                                    this.filter.releaseYearEnd
+                                                ) : _react2.default.createElement(
+                                                    'option',
+                                                    { key: "год выхода конец", selected: true, disabled: true },
+                                                    '\u0413\u043E\u0434 \u0432\u044B\u0445\u043E\u0434\u0430'
+                                                ),
+                                                this.state.data.filterData.endYears.map(function (value, index, array) {
+                                                    return _react2.default.createElement(
+                                                        'option',
+                                                        { key: value },
+                                                        value
+                                                    );
+                                                })
+                                            )
+                                        )
+                                    )
+                                ),
+                                _react2.default.createElement('div', { className: 'w-100 d-none d-md-block' }),
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'form-group list-group-item' },
+                                    _react2.default.createElement(
+                                        'div',
+                                        { className: 'row' },
+                                        _react2.default.createElement(
+                                            'label',
+                                            { className: 'col-md-3 control-label', htmlFor: 'rating' },
+                                            '\u0421\u0440\u0435\u0434\u043D\u0438\u0439 \u0440\u0435\u0439\u0442\u0438\u043D\u0433'
+                                        ),
+                                        _react2.default.createElement(
+                                            'div',
+                                            { className: 'col-md-9' },
+                                            _react2.default.createElement('input', { className: 'form-control-range', type: 'range', min: '0', max: '10', value: this.filter.rating, id: 'rating', name: 'rating', onChange: function onChange(e) {
+                                                    return _this3.filter.rating = parseInt(e.target.value);
+                                                } })
+                                        )
+                                    )
+                                ),
+                                _react2.default.createElement('div', { className: 'w-100 d-none d-md-block' }),
+                                _react2.default.createElement(
+                                    'div',
+                                    { className: 'form-group list-group-item' },
+                                    _react2.default.createElement(
+                                        'div',
+                                        { className: 'row' },
+                                        _react2.default.createElement(
+                                            'label',
+                                            { className: 'col-md-3 control-label', htmlFor: 'ageRating' },
+                                            '\u0412\u043E\u0437\u0440\u0430\u0441\u0442\u043D\u043E\u0439 \u0440\u0435\u0439\u0442\u0438\u043D\u0433'
+                                        ),
+                                        _react2.default.createElement(
+                                            'div',
+                                            { className: 'col-md-9' },
+                                            _react2.default.createElement(
+                                                'select',
+                                                { className: 'form-control', id: 'ageRating', name: 'ageRating', onChange: function onChange(e) {
+                                                        return _this3.filter.ageRating = e.target.value;
+                                                    } },
+                                                this.filter.ageRating ? _react2.default.createElement(
+                                                    'option',
+                                                    { key: this.filter.ageRating, selected: true },
+                                                    this.filter.ageRating
+                                                ) : _react2.default.createElement(
+                                                    'option',
+                                                    { key: "Выберите возрастной рейтинг", selected: true, disabled: true },
+                                                    '\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0432\u043E\u0437\u0440\u0430\u0441\u0442\u043D\u043E\u0439 \u0440\u0435\u0439\u0442\u0438\u043D\u0433'
+                                                ),
+                                                this.state.data.filterData.ageRatings.map(function (value, index, array) {
+                                                    return _react2.default.createElement(
+                                                        'option',
+                                                        { key: value },
+                                                        value
+                                                    );
+                                                })
+                                            )
+                                        )
+                                    )
+                                )
+                            ),
                             _react2.default.createElement('div', { className: 'w-100 d-none d-md-block' }),
                             _react2.default.createElement(
                                 'div',
@@ -34229,7 +34514,7 @@ var GameList = function (_React$Component) {
                                         { className: 'col-md-3' },
                                         _react2.default.createElement(
                                             'button',
-                                            { type: 'submit', className: 'btn btn-success' },
+                                            { type: 'submit', className: 'btn btn-success', onClick: this.getPage.bind(this, 1) },
                                             '\u041F\u0440\u0438\u043C\u0435\u043D\u0438\u0442\u044C'
                                         )
                                     )
